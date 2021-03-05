@@ -2,15 +2,6 @@ build:
 	docker build -t py-slam-test .
 
 run:
-	docker run -it \
-	--mount src="`pwd`/notebooks",target=/notebooks,type=bind \
-	--mount src="/home/azazdeaz/repos/test/mono-vo/dataset/kitti05/image_0/",target=/images,type=bind,readonly \
-	-p 8888:8888 \
-	py-slam-test \
-	jupyter notebook --allow-root --ip 0.0.0.0 --port 8888 --no-browser
-
-
-run2:
 	xhost + \
 	&& docker run -it \
 		--name slam_test \
