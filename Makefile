@@ -1,6 +1,9 @@
 build:
 	docker build -t py-slam-test .
 
+build-rpi:
+	docker build -f Dockerfile.rpi -t py-slam-test-rpi .
+
 run:
 	xhost + \
 	&& docker run -it \
