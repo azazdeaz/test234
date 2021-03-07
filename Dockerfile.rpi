@@ -56,7 +56,7 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashr
 RUN echo 'export PYTHONPATH=/usr/local/python/:$PYTHONPATH' >> /root/.bashrc
 
 # Python dependencies
-RUN python3 -m pip install numpy notebook gtsam matplotlib tqdm scipy
+RUN python3 -m pip install numpy notebook matplotlib tqdm scipy
 RUN python3 -m pip install ipywidgets --upgrade
 RUN jupyter nbextension enable --py widgetsnbextension
 

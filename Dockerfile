@@ -55,6 +55,8 @@ RUN apt-get update \
     && apt-get -qq clean
 
 RUN python3 -m pip install numpy notebook gtsam matplotlib tqdm scipy
+RUN python3 -m pip install ipywidgets --upgrade
+RUN jupyter nbextension enable --py widgetsnbextension
 
 
 # OpenCV
