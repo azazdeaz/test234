@@ -1,41 +1,69 @@
-FROM ros:noetic
+FROM ubuntu:focal
 
 # Disable GUI prompts
 ENV DEBIAN_FRONTEND noninteractive
 
-# Update apps on the base image
-RUN apt-get -y update && apt-get -y install
+RUN apt update \
+    && apt install -y \
+        build-essential \
+        apt-utils \ 
+        && apt -qq clean
 
-# Install C++
-RUN apt-get -y install build-essential  apt-utils
+RUN apt update \
+    && apt install -y \
+        libboost-all-dev \
+        cmake \
+        && apt -qq clean
 
-# Install boost and cmake
-RUN apt-get -y install libboost-all-dev cmake
+RUN apt update \
+    && apt install -y \
+        libtbb-dev \
+        && apt -qq clean
 
-# Install TBB
-RUN apt-get -y install libtbb-dev
+RUN apt update \
+    && apt install -y \
+        git \
+        && apt -qq clean
+
+RUN apt update \
+    && apt install -y \
+        python3-pip \
+        python3-dev \
+    && apt -qq clean
 
 
-# Install git
-RUN apt-get update && \
-    apt-get install -y git
+# RUN apt-get -y update && apt-get -y install
 
-# Install compiler
-RUN apt-get install -y build-essential
+# # Install C++
+# RUN apt-get -y install build-essential  apt-utils
+
+# # Install boost and cmake
+# RUN apt-get -y install libboost-all-dev cmake
+
+# # Install TBB
+# RUN apt-get -y install libtbb-dev
+
+
+# # Install git
+# RUN apt-get update && \
+#     apt-get install -y git
+
+# # Install compiler
+# RUN apt-get install -y build-essential
 
 # Clone GTSAM (develop branch)
 WORKDIR /usr/src/
 RUN git clone --single-branch --branch develop https://github.com/borglab/gtsam.git
 
 # Install pip
-RUN apt-get install -y python3-pip python3-dev
+# RUN apt-get install -y python3-pip python3-dev
 
 # Install python wrapper requirements
 RUN python3 -m pip install -U -r /usr/src/gtsam/python/requirements.txt
 
 # Change to build directory. Will be created automatically.
 WORKDIR /usr/src/gtsam/build
-# Run cmake
+
 RUN cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DGTSAM_WITH_EIGEN_MKL=OFF \
@@ -47,8 +75,8 @@ RUN cmake \
     ..
 
 # Build
-RUN make -j4 install
-RUN make -j4 python-install
+RUN make -j8 install
+RUN make -j8 python-install
 # RUN make clean
 
 # Needed to link with GTSAM
@@ -63,6 +91,7 @@ RUN apt-get update \
     && apt-get install -y \
         libffi-dev \
         python3-opencv \
+        curl \
     && apt-get -qq clean
 
 
@@ -70,13 +99,47 @@ RUN apt-get update \
 RUN python3 -m pip install notebook matplotlib tqdm ipywidgets --upgrade
 RUN jupyter nbextension enable --py widgetsnbextension
 
-COPY . /catkin_ws/src
-WORKDIR /catkin_ws
+#python hardver dependencies
+RUN python3 -m pip install inputs --upgrade
+RUN python3 -m pip install mpu6050-raspberrypi --upgrade
+RUN python3 -m pip install pyzmq --upgrade
+# RUN python3 -m pip install picamera --upgrade
+RUN python3 -m pip install gpiozero --upgrade
 
-RUN rosdep update
-RUN rosdep install --from-paths src --ignore-src -r -y  || echo "There were some errors during rosdep install"
-SHELL ["/bin/bash", "-c"]
-RUN source /opt/ros/noetic/setup.bash && \
-    catkin_make
+# Zenoh
+# RUN apt-get update \
+#     && apt-get install -y \
+#         curl \
+#     && apt-get -qq clean
+# RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# ENV PATH="/root/.cargo/bin:${PATH}"
+# RUN rustup default nightly
+# RUN cargo install --git https://github.com/eclipse-zenoh/zenoh.git
 
-ENV WORLD_DIR=/catkin_ws/src/fields_ignition/generated_examples/tomato_field
+# setup python venv
+# RUN apt-get update \
+#     && apt-get install -y \
+#         python3-pip \
+#         python3-dev \
+#         python3-venv \
+#     && apt-get -qq clean
+# ENV VIRTUAL_ENV=/opt/venv
+# RUN python3 -m venv $VIRTUAL_ENV
+# ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# RUN python3 -m pip install maturin
+# WORKDIR /zenoh-python
+# RUN git clone https://github.com/eclipse-zenoh/zenoh-python.git .
+# RUN maturin develop --release
+
+# COPY . /catkin_ws/src
+# WORKDIR /catkin_ws
+
+# RUN rosdep update
+# RUN rosdep install --from-paths src --ignore-src -r -y  || echo "There were some errors during rosdep install"
+# SHELL ["/bin/bash", "-c"]
+# RUN source /opt/ros/noetic/setup.bash && \
+#     catkin_make
+# RUN echo 'source /catkin_ws/devel/setup.bash' >> /root/.bashrc
+
+# ENV WORLD_DIR=/catkin_ws/src/fields_ignition/generated_examples/tomato_field

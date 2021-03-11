@@ -5,6 +5,19 @@ build-rpi:
 	docker build -f Dockerfile.rpi -t py-slam-test-rpi .
 
 run:
+	docker run -it \
+		--name slam_test \
+		-v "/dev/input:/dev/input" \
+		--network host \
+		--rm \
+		--privileged \
+		--mount src="`pwd`/notebooks",target=/catkin_ws/src/notebooks,type=bind \
+		--mount src="/home/azazdeaz/repos/test/mono-vo/dataset/kitti05/image_0/",target=/images,type=bind,readonly \
+		-p 8888:8888 \
+		azazdeaz/ps-test \
+		bash -c "jupyter notebook /catkin_ws/src/notebooks --allow-root --ip 0.0.0.0 --port 8888 --no-browser"
+
+run-desktop:
 	xhost + \
 	&& docker run -it \
 		--name slam_test \

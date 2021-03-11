@@ -65,6 +65,15 @@ RUN apt-get update \
         python3-opencv \
     && apt-get -qq clean
 
+RUN apt-get update \
+    && apt-get install -y \
+        curl \
+    && apt-get -qq clean
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup default nightly
+RUN cargo install --git https://github.com/eclipse-zenoh/zenoh.git
+
 COPY . /catkin_ws/src
 WORKDIR /catkin_ws
 
