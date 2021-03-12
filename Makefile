@@ -37,5 +37,6 @@ run-desktop:
 		--mount src="`pwd`/fields_ignition/scripts",target=/catkin_ws/src/fields_ignition/scripts,type=bind \
 		--mount src="/home/azazdeaz/repos/test/mono-vo/dataset/kitti05/image_0/",target=/images,type=bind,readonly \
 		-p 8888:8888 \
+		-p 5555:5555 \
 		py-slam-test \
 		bash -c "ls && source devel/setup.bash && jupyter notebook --allow-root --ip 0.0.0.0 --port 8888 --no-browser"

@@ -100,11 +100,12 @@ RUN python3 -m pip install notebook matplotlib tqdm ipywidgets --upgrade
 RUN jupyter nbextension enable --py widgetsnbextension
 
 #python hardver dependencies
-RUN python3 -m pip install inputs --upgrade
-RUN python3 -m pip install mpu6050-raspberrypi --upgrade
-RUN python3 -m pip install pyzmq --upgrade
 # RUN python3 -m pip install picamera --upgrade
-RUN python3 -m pip install gpiozero --upgrade
+RUN apt-get update \
+    && apt-get install -y \
+        python3-smbus \
+    && apt-get -qq clean
+RUN python3 -m pip install inputs mpu6050-raspberrypi pyzmq RPi.GPIO gpiozero msgpack --upgrade
 
 # Zenoh
 # RUN apt-get update \
