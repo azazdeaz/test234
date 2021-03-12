@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ros:noetic
 
 # Disable GUI prompts
 ENV DEBIAN_FRONTEND noninteractive
