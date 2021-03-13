@@ -36,6 +36,7 @@ run-desktop:
 		--security-opt seccomp=unconfined \
 		--mount src="`pwd`/notebooks",target=/catkin_ws/src/notebooks,type=bind \
 		--mount src="/home/azazdeaz/repos/test/mono-vo/dataset/kitti05/image_0/",target=/images,type=bind,readonly \
+		--mount src="`pwd`/bags",target=/bags,type=bind,readonly \
 		-p 8888:8888 \
 		-p 5555:5555 \
 		py-slam-test \
