@@ -10,9 +10,9 @@ Panels:
         - /Camera1
         - /Camera1/Status1
         - /Truth1
-        - /Truth1/Status1
         - /Initial Estimate1
         - /Initial Estimate1/Status1
+        - /Optimized1
       Splitter Ratio: 0.5
     Tree Height: 407
   - Class: rviz/Selection
@@ -120,7 +120,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 0; 255; 127
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -144,7 +144,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 170; 0; 127
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -168,7 +168,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 85; 85; 255
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -217,7 +217,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 37.27945327758789
+      Distance: 5.874135971069336
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
