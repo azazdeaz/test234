@@ -54,9 +54,70 @@ RUN apt-get update \
     && apt-get install python3-pip -y\
     && apt-get -qq clean
 
-RUN python3 -m pip install numpy notebook gtsam matplotlib tqdm scipy
+RUN python3 -m pip install numpy notebook matplotlib tqdm scipy
 RUN python3 -m pip install ipywidgets --upgrade
 RUN jupyter nbextension enable --py widgetsnbextension
+
+
+
+
+# GTSAM
+
+# Disable GUI prompts
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update apps on the base image
+RUN apt-get -y update && apt-get -y install
+
+# Install C++
+RUN apt-get -y install build-essential  apt-utils
+
+# Install boost and cmake
+RUN apt-get -y install libboost-all-dev cmake
+
+# Install TBB
+RUN apt-get -y install libtbb-dev
+
+# Install pip
+RUN apt-get install -y python3-pip python3-dev
+
+# Install compiler
+RUN apt-get install -y build-essential
+
+# Clone GTSAM (develop branch)
+WORKDIR /usr/src/
+RUN git clone --single-branch --branch develop https://github.com/borglab/gtsam.git
+
+# Install python wrapper requirements
+RUN python3 -m pip install -U -r /usr/src/gtsam/python/requirements.txt
+
+# Run cmake again, now with python toolbox on
+WORKDIR /usr/src/gtsam/build
+RUN cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DGTSAM_WITH_EIGEN_MKL=OFF \
+    -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
+    -DGTSAM_BUILD_TIMING_ALWAYS=OFF \
+    -DGTSAM_BUILD_TESTS=OFF \
+    -DGTSAM_BUILD_PYTHON=ON \
+    -DGTSAM_PYTHON_VERSION=3\
+    ..
+
+# Build 
+RUN make -j6 install
+RUN make -j6 python-install
+# RUN make clean
+
+# Needed to link with GTSAM
+RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashrc
+
+# Needed to run python wrapper:
+RUN echo 'export PYTHONPATH=/usr/local/python/:$PYTHONPATH' >> /root/.bashrc
+
+# Run bash
+CMD ["bash"]
+
+
 
 
 # OpenCV
