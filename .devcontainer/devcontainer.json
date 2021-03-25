@@ -1,0 +1,73 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.165.0/containers/docker-existing-dockerfile
+{
+	"name": "Existing Dockerfile",
+
+	// Sets the run context to one level up instead of the .devcontainer folder.
+	"context": "..",
+
+	// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+	"dockerFile": "../Dockerfile",
+
+	"workspaceFolder": "/catkin_ws",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/catkin_ws/src/,type=bind,consistency=cached"
+
+	// Set *default* container specific settings.json values on container create.
+	"settings": { 
+		"terminal.integrated.shell.linux": null
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-python.python"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [8888, 5555],
+
+	// Uncomment the next line to run commands after the container is created - for example installing curl.
+	// "postCreateCommand": "apt-get update && apt-get install -y curl",
+
+	
+	"runArgs": [ 
+		// // Uncomment when using a ptrace-based debugger like C++, Go, and Rust
+		// "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined",
+		// // share display and other stuff //TODO clear up
+		"-e","DISPLAY",
+		"-e","QT_X11_NO_MITSHM=1",
+		// "-e","XAUTHORITY=${localEnv::XAUTH}",
+		// "-v","\"${localEnv::XAUTH}:${localEnv::XAUTH}\"",
+		"-v","/tmp/.X11-unix:/tmp/.X11-unix",
+		"-v","/etc/localtime:/etc/localtime:ro",
+		"-v","/dev/input:/dev/input",
+		// "--network host",
+		"--rm",
+		"--privileged",
+		"--runtime=nvidia",
+		// "--security-opt seccomp=unconfined",
+		// "--mount src=\"`pwd`/notebooks\",target=/catkin_ws/src/notebooks,type=bind",
+		// "--mount src=\"/home/azazdeaz/repos/test/mono-vo/dataset/kitti05/image_0/\",target=/images,type=bind,readonly",
+		// "--mount src=\"`pwd`/bags\",target=/bags,type=bind,readonly",
+		// "-p 8888:8888",
+		// "-p 5555:5555"
+	 ],
+
+	 "remoteEnv": {
+		// "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+		// "XAUTHORITY": "${XAUTH}"
+	},
+
+	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker.
+	"mounts": [ 
+		// "source=${XAUTH},target=${XAUTH},type=bind" 
+		// "source=/dev/input,target=/dev/input",
+		// "source=/etc/localtime,target=/etc/localtime,readonly"
+	],
+
+	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+	// "remoteUser": "vscode"
+}
+
+
+// py-slam-test \
+// bash -c "source devel/setup.bash && jupyter notebook --allow-root --ip 0.0.0.0 --port 8888 --no-browser"

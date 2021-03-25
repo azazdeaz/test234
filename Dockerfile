@@ -135,14 +135,17 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup default nightly
 RUN cargo install --git https://github.com/eclipse-zenoh/zenoh.git
 
-COPY . /catkin_ws/src
+# COPY . /catkin_ws/src
 WORKDIR /catkin_ws
+RUN mkdir src
 
 RUN rosdep update
 RUN rosdep install --from-paths src --ignore-src -r -y  || echo "There were some errors during rosdep install"
 SHELL ["/bin/bash", "-c"]
 RUN source /opt/ros/noetic/setup.bash && \
     catkin_make
+
+RUN echo "source /catkin_ws/devel/setup.bash" >> /root/.bashrc
 
 ENV WORLD_DIR=/catkin_ws/src/fields_ignition/generated_examples/tomato_field
 # CMD source devel/setup.bash && roslaunch fields_ignition field.launch world_dir:=${WORLD_DIR}
