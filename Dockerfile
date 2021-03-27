@@ -318,18 +318,22 @@ RUN set -x && \
   # apt-get autoremove -y -qq && \
   rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update \
+    && apt-get install -y \
+        nodejs npm \
+    && apt-get -qq clean
 
 # COPY . /catkin_ws/src
 WORKDIR /catkin_ws
 RUN mkdir src
 
-RUN rosdep update
-RUN rosdep install --from-paths src --ignore-src -r -y  || echo "There were some errors during rosdep install"
-SHELL ["/bin/bash", "-c"]
-RUN source /opt/ros/noetic/setup.bash && \
-    catkin_make_isolated
+# RUN rosdep update
+# RUN rosdep install --from-paths src --ignore-src -r -y  || echo "There were some errors during rosdep install"
+# SHELL ["/bin/bash", "-c"]
+# RUN source /opt/ros/noetic/setup.bash && \
+#     catkin_make_isolated
 
-RUN echo "source /catkin_ws/devel/setup.bash" >> /root/.bashrc
+# RUN echo "source /catkin_ws/devel/setup.bash" >> /root/.bashrc
 
-ENV WORLD_DIR=/catkin_ws/src/fields_ignition/generated_examples/tomato_field
+# ENV WORLD_DIR=/catkin_ws/src/fields_ignition/generated_examples/tomato_field
 # CMD source devel/setup.bash && roslaunch fields_ignition field.launch world_dir:=${WORLD_DIR}
