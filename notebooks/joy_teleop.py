@@ -163,9 +163,6 @@ class Control():
                             cls.bumper[0] = event.state == 1
                         if event.code == "BTN_TR":
                             cls.bumper[1] = event.state == 1
-                # print(cls.rx, cls.ry)
-            # elif event.ev_type == "Sync" and event.code == "SYN_REPORT":
-            #     self.x, self.y = 0, 0
     @classmethod
     def send_control(cls):
         while True:

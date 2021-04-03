@@ -1,5 +1,5 @@
 # FROM nvidia/cudagl:11.0-base
-FROM nvidia/opengl:1.2-glvnd-devel-ubuntu20.04
+FROM ubuntu:20.04
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -22,140 +22,104 @@ RUN apt-get -qq update && apt-get -q -y install \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -qq clean
 
+
+
+# TODO move up
+ARG NUM_THREADS=8
+ARG CMAKE_INSTALL_PREFIX=/usr/local 
+
+ENV CPATH=${CMAKE_INSTALL_PREFIX}/include:${CPATH}
+ENV C_INCLUDE_PATH=${CMAKE_INSTALL_PREFIX}/include:${C_INCLUDE_PATH}
+ENV CPLUS_INCLUDE_PATH=${CMAKE_INSTALL_PREFIX}/include:${CPLUS_INCLUDE_PATH}
+ENV LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${LD_LIBRARY_PATH}
+
 # setup sources.list and keys
-RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros-latest.list \
-    && apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-# install ROS (including dependencies for building packages) and other packages
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get -qq update && apt-get -q -y install \
-    python3-pip \
-    python3-rosdep \
-    python3-vcstool \
-    ros-noetic-desktop \
-    && rosdep init \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get -qq clean
+# RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros-latest.list \
+#     && apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+# # install ROS (including dependencies for building packages) and other packages
+# ARG DEBIAN_FRONTEND=noninteractive
+# RUN apt-get -qq update && apt-get -q -y install \
+#     python3-pip \
+#     python3-rosdep \
+#     python3-vcstool \
+#     ros-noetic-desktop \
+#     && rosdep init \
+#     && rm -rf /var/lib/apt/lists/* \
+#     && apt-get -qq clean
 
 # sdformat8-sdf conflicts with sdformat-sdf installed from gazebo
 # so we need to workaround this using a force overwrite
 # Do this before installing ign-gazebo
 # (then install ign-blueprint and ros to ign bridge)
-RUN echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
-    && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 \
-    && apt-get -qq update && apt-get -q -y install \
-    ignition-dome \
-    ros-noetic-ros-ign \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get -qq clean
-
-
-RUN apt-get update \
-    && apt-get install python3-pip -y\
-    && apt-get -qq clean
-
-RUN python3 -m pip install numpy notebook matplotlib tqdm scipy
-RUN python3 -m pip install ipywidgets --upgrade
-RUN jupyter nbextension enable --py widgetsnbextension
+# RUN echo "deb [trusted=yes] http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list \
+#     && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - \
+#     && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 \
+#     && apt-get -qq update && apt-get -q -y install \
+#     ignition-dome \
+#     ros-noetic-ros-ign \
+#     && rm -rf /var/lib/apt/lists/* \
+#     && apt-get -qq clean
 
 
 
 
-# GTSAM
+# # GTSAM
 
-# Disable GUI prompts
-ENV DEBIAN_FRONTEND noninteractive
+# # Disable GUI prompts
+# ENV DEBIAN_FRONTEND noninteractive
 
-# Update apps on the base image
-RUN apt-get -y update && apt-get -y install
+# # Update apps on the base image
+# RUN apt-get -y update && apt-get -y install
 
-# Install C++
-RUN apt-get -y install build-essential  apt-utils
+# # Install C++
+# RUN apt-get -y install build-essential  apt-utils
 
-# Install boost and cmake
-RUN apt-get -y install libboost-all-dev cmake
+# # Install boost and cmake
+# RUN apt-get -y install libboost-all-dev cmake
 
-# Install TBB
-RUN apt-get -y install libtbb-dev
+# # Install TBB
+# RUN apt-get -y install libtbb-dev
 
-# Install pip
-RUN apt-get install -y python3-pip python3-dev
+# # Install pip
+# RUN apt-get install -y python3-pip python3-dev
 
-# Install compiler
-RUN apt-get install -y build-essential
+# # Install compiler
+# RUN apt-get install -y build-essential
 
-# Clone GTSAM (develop branch)
-WORKDIR /usr/src/
-RUN git clone --single-branch --branch develop https://github.com/borglab/gtsam.git
+# # Clone GTSAM (develop branch)
+# WORKDIR /usr/src/
+# RUN git clone --single-branch --branch develop https://github.com/borglab/gtsam.git
 
-# Install python wrapper requirements
-RUN python3 -m pip install -U -r /usr/src/gtsam/python/requirements.txt
+# # Install python wrapper requirements
+# RUN python3 -m pip install -U -r /usr/src/gtsam/python/requirements.txt
 
-# Run cmake again, now with python toolbox on
-WORKDIR /usr/src/gtsam/build
-RUN cmake \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DGTSAM_WITH_EIGEN_MKL=OFF \
-    -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
-    -DGTSAM_BUILD_TIMING_ALWAYS=OFF \
-    -DGTSAM_BUILD_TESTS=OFF \
-    -DGTSAM_BUILD_PYTHON=ON \
-    -DGTSAM_PYTHON_VERSION=3\
-    ..
+# # Run cmake again, now with python toolbox on
+# WORKDIR /usr/src/gtsam/build
+# RUN cmake \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DGTSAM_WITH_EIGEN_MKL=OFF \
+#     -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
+#     -DGTSAM_BUILD_TIMING_ALWAYS=OFF \
+#     -DGTSAM_BUILD_TESTS=OFF \
+#     -DGTSAM_BUILD_PYTHON=ON \
+#     -DGTSAM_PYTHON_VERSION=3\
+#     ..
 
-# Build 
-RUN make -j6 install
-RUN make -j6 python-install
-# RUN make clean
+# # Build 
+# RUN make -j6 install
+# RUN make -j6 python-install
+# # RUN make clean
 
-# Needed to link with GTSAM
-RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashrc
+# # Needed to link with GTSAM
+# RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashrc
 
-# Needed to run python wrapper:
-RUN echo 'export PYTHONPATH=/usr/local/python/:$PYTHONPATH' >> /root/.bashrc
+# # Needed to run python wrapper:
+# RUN echo 'export PYTHONPATH=/usr/local/python/:$PYTHONPATH' >> /root/.bashrc
 
-# Run bash
-CMD ["bash"]
+# # Run bash
+# CMD ["bash"]
 
-
-# TODO move up
-ARG NUM_THREADS=8
-
-# OpenCV
-WORKDIR /tmp
-RUN set -x && \
-    apt-get update && \
-    apt-get install -y \
-        python3-dev \
-        python3-numpy \
-        libavcodec-dev libavformat-dev libswscale-dev \
-        libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
-        libgtk-3-dev \
-        libpng-dev libjpeg-dev && \
-    apt-get -qq clean && \
-    git clone --depth 1 -j8 https://github.com/opencv/opencv.git && \
-    mkdir -p build && \
-    cd build && \
-    cmake ../opencv && \
-    make -j${NUM_THREADS} && \
-    make install && \
-    cd /tmp && \
-    rm -rf *
-
-# Rust
-RUN apt-get update \
-    && apt-get install -y \
-        curl \
-    && apt-get -qq clean
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup default nightly
-# RUN cargo install --git https://github.com/eclipse-zenoh/zenoh.git
-
-RUN apt-get update \
-    && apt-get install -y \
-        libzmq3-dev \
-    && apt-get -qq clean
 
 # install dependencies via apt
 ENV DEBCONF_NOWARNINGS yes
@@ -198,13 +162,67 @@ RUN set -x && \
   apt-get autoremove -y -qq && \
   rm -rf /var/lib/apt/lists/*
 
-ENV CPATH=${CMAKE_INSTALL_PREFIX}/include:${CPATH}
-ENV C_INCLUDE_PATH=${CMAKE_INSTALL_PREFIX}/include:${C_INCLUDE_PATH}
-ENV CPLUS_INCLUDE_PATH=${CMAKE_INSTALL_PREFIX}/include:${CPLUS_INCLUDE_PATH}
-ENV LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${LIBRARY_PATH}
-ENV LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${LD_LIBRARY_PATH}
-# TODO move up
-ARG CMAKE_INSTALL_PREFIX=/usr/local 
+# OpenCV
+WORKDIR /tmp
+RUN set -x && \
+    apt-get update && \
+    apt-get install -y \
+        cmake build-essential pkg-config git \
+        python3-dev \
+        python3-numpy \
+        libavcodec-dev libavformat-dev libswscale-dev \
+        libv4l-dev libxvidcore-dev libx264-dev libdc1394-22-dev \
+        libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+        libgtk-3-dev \
+        libpng-dev libjpeg-dev \
+        libatlas-base-dev liblapacke-dev gfortran \
+        libhdf5-dev libhdf5-103 \
+        && \
+    apt-get -qq clean
+RUN set -x && \
+    git clone --depth 1 -j8 https://github.com/opencv/opencv.git && \
+    git clone --depth 1 -j8 https://github.com/opencv/opencv_contrib.git && \
+    ls -l /tmp/opencv/modules && \
+    ls -l /tmp/opencv_contrib/modules
+# RUN set -x && \
+#     wget -O opencv.zip --no-check-certificate https://github.com/opencv/opencv/archive/4.5.1.zip  && \
+#     unzip opencv.zip && \
+#     wget -O opencv_contrib.zip --no-check-certificate https://github.com/opencv/opencv_contrib/archive/4.5.1.zip && \
+#     unzip opencv_contrib.zip
+RUN set -x && \
+    mkdir -p build && \
+    cd build && \
+    cmake -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}  \
+      -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
+      # -D ENABLE_NEON=ON \
+      # -D ENABLE_VFPV3=ON \
+      -D BUILD_TESTS=OFF \
+      -D INSTALL_PYTHON_EXAMPLES=OFF \
+      -D OPENCV_ENABLE_NONFREE=ON \
+      -D CMAKE_SHARED_LINKER_FLAGS=-latomic \
+      -D BUILD_EXAMPLES=OFF ../opencv && \
+    make -j${NUM_THREADS} && \
+    make install && \
+    cd /tmp && \
+    rm -rf *
+
+# Rust
+RUN apt-get update \
+    && apt-get install -y \
+        curl \
+    && apt-get -qq clean
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup default nightly
+# RUN cargo install --git https://github.com/eclipse-zenoh/zenoh.git
+
+RUN apt-get update \
+    && apt-get install -y \
+        libzmq3-dev \
+    && apt-get -qq clean
+
+
 
 # Eigen
 ARG EIGEN3_VERSION=3.3.7
@@ -305,9 +323,9 @@ RUN set -x && \
   apt-get update -y -qq && \
   apt-get upgrade -y -qq --no-install-recommends && \
   apt-get install -y -qq autogen autoconf libtool && \
-  wget -q https://github.com/google/protobuf/archive/v3.6.1.tar.gz && \
-  tar xf v3.6.1.tar.gz && \
-  cd protobuf-3.6.1 && \
+  wget -q https://github.com/google/protobuf/archive/v3.15.6.tar.gz && \
+  tar xf v3.15.6.tar.gz && \
+  cd protobuf-3.15.6 && \
   ./autogen.sh && \
   ./configure --prefix=${CMAKE_INSTALL_PREFIX} --enable-static=no && \
   make -j${NUM_THREADS} && \
@@ -318,10 +336,46 @@ RUN set -x && \
   # apt-get autoremove -y -qq && \
   rm -rf /var/lib/apt/lists/*
 
+
+WORKDIR /tmp
+RUN set -x && \
+  git clone --depth 1 https://github.com/zeromq/libzmq.git && \
+  cd libzmq && \
+  mkdir -p build && \
+  cd build && \
+  cmake .. && \
+  make -j${NUM_THREADS} && \
+  make install && \
+  cd /tmp && \
+  rm -rf *
+
+WORKDIR /tmp
+RUN set -x && \
+  git clone --depth 1 https://github.com/zeromq/cppzmq.git && \
+  cd cppzmq && \
+  mkdir -p build && \
+  cd build && \
+  cmake .. && \
+  make -j${NUM_THREADS} && \
+  make install && \
+  cd /tmp && \
+  rm -rf *
+
+  
 RUN apt-get update \
     && apt-get install -y \
         nodejs npm \
     && apt-get -qq clean
+
+
+RUN apt-get update \
+    && apt-get install python3-pip -y\
+    && apt-get install python3-numpy python3-scipy -y\
+    && apt-get -qq clean
+
+RUN python3 -m pip install notebook matplotlib tqdm inputs msgpack
+RUN python3 -m pip install ipywidgets --upgrade
+RUN jupyter nbextension enable --py widgetsnbextension
 
 # COPY . /catkin_ws/src
 WORKDIR /catkin_ws
